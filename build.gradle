@@ -1,0 +1,88 @@
+plugins {
+    id 'application'
+    id 'eclipse'
+    id 'org.javamodularity.moduleplugin' version '1.7.0'
+}
+
+wrapper.gradleVersion = '7.0.2'
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+modularity.improveEclipseClasspathFile()
+
+repositories {
+    mavenCentral()
+    google()
+}
+
+dependencies {
+    configurations.implementation.canBeResolved = true
+
+	implementation 'com.google.api-client:google-api-client:1.31.5'
+    implementation 'jakarta.json.bind:jakarta.json.bind-api:2.0.0'
+    implementation 'org.eclipse:yasson:2.0.2'
+    implementation 'com.auth0:java-jwt:3.16.0'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+}
+
+application {
+    mainClass = 'cyou.obliquerays.media.RadioArchiveProcess'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+    withSourcesJar()
+    withJavadocJar()
+}
+
+jar {
+    manifest {
+        attributes('Name': 'cyou.obliquerays.media')
+        attributes('Specification-Title': 'radio-archive')
+        attributes('Specification-Version': '1.0.0')
+        attributes('Specification-Vendor': 'cyou.obliquerays')
+        attributes('Implementation-Title': 'radio-archive')
+        attributes('Implementation-Version': '1.0.0')
+        attributes('Implementation-Vendor': 'cyou.obliquerays')
+        attributes('Automatic-Module-Name': 'radio.archive')
+        attributes('Main-Class': 'cyou.obliquerays.media.RadioArchiveProcess')
+    }
+    doLast {
+        file('gradle/release').mkdirs()
+        delete {
+            delete files('gradle/release')
+        }
+        copy {
+            from configurations.implementation
+            into 'gradle/release'
+        }
+        copy{
+            from jar
+            into 'gradle/release'
+        }
+    }
+}
+
+tasks.withType(Javadoc) {
+    failOnError = false
+    options {
+        memberLevel = JavadocMemberLevel.PRIVATE
+        encoding = 'UTF-8'
+        links("https://docs.oracle.com/javase/jp/11/docs/api/")
+    }
+}
+
+compileTestJava {
+    onlyIf { project.hasProperty('goTest') }
+}
+
+test {
+    onlyIf { project.hasProperty('goTest') }
+    testLogging.showStandardStreams = true
+    moduleOptions {
+        runOnClasspath = true
+    }
+    useJUnitPlatform()
+}
