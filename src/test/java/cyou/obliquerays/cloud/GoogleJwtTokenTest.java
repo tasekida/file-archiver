@@ -1,5 +1,5 @@
 /**
- *  Copyright 2021 takahiro
+ * Copyright (C) 2021 tasekida
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package cyou.obliquerays.service;
+package cyou.obliquerays.cloud;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,8 +38,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import cyou.obliquerays.cloud.GoogleJwtToken;
 import cyou.obliquerays.media.RadioArchiveProcess;
-import cyou.obliquerays.service.GoogleJwtToken;
 
 /**
  * GoogleJwtTokenのUnitTest
