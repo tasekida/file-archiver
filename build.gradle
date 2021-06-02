@@ -17,10 +17,8 @@ repositories {
 dependencies {
     configurations.implementation.canBeResolved = true
 
-	implementation 'com.google.api-client:google-api-client:1.31.5'
     implementation 'jakarta.json.bind:jakarta.json.bind-api:2.0.0'
     implementation 'org.eclipse:yasson:2.0.2'
-    implementation 'com.auth0:java-jwt:3.16.0'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'

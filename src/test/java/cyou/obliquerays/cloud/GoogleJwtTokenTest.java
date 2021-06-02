@@ -38,15 +38,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import cyou.obliquerays.cloud.GoogleJwtToken;
-import cyou.obliquerays.media.RadioArchiveProcess;
-
 /**
  * GoogleJwtTokenのUnitTest
  */
 class GoogleJwtTokenTest {
     /** ロガー */
-    private static final Logger LOGGER = Logger.getLogger(RadioArchiveProcess.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GoogleJwtTokenTest.class.getName());
 
 	/**
 	 * @throws java.lang.Exception
