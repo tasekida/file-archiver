@@ -1,5 +1,5 @@
 /**
- *  Copyright 2021 tasekida
+ *  Copyright (C) 2021 tasekida
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import cyou.obliquerays.media.config.RadioProperties;
+import cyou.obliquerays.config.RadioProperties;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import jakarta.json.bind.JsonbConfig;

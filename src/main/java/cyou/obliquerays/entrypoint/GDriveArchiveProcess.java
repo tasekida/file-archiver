@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package cyou.obliquerays.media;
+package cyou.obliquerays.entrypoint;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,9 +31,9 @@ import cyou.obliquerays.status.LockFileStatus;
 /**
  * ラジオ録音ファイル保存
  */
-public class RadioArchiveProcess {
+public class GDriveArchiveProcess {
     /** ロガー */
-    private static final Logger LOGGER = Logger.getLogger(RadioArchiveProcess.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GDriveArchiveProcess.class.getName());
 
     /** スレッド管理 */
 	private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
@@ -42,7 +42,7 @@ public class RadioArchiveProcess {
 	 * デフォルトコンストラクタ
 	 * @throws IOException ファイル操作失敗
 	 */
-	public RadioArchiveProcess() throws IOException {
+	public GDriveArchiveProcess() throws IOException {
 		var lockFile = Path.of(this.getClass().getSimpleName() + ".lock");
     	try {
 			var lockFileStatus =
@@ -93,7 +93,7 @@ public class RadioArchiveProcess {
         }
 
         try {
-        	RadioArchiveProcess radioArchive = new RadioArchiveProcess();
+        	GDriveArchiveProcess radioArchive = new GDriveArchiveProcess();
         	radioArchive.execute();
         } catch (InterruptedException e) {
         	LOGGER.log(Level.INFO, "割り込み終了", e);

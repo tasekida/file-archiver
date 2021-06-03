@@ -1,4 +1,4 @@
 /**
  * 設定パラメータのパッケージ
  */
-package cyou.obliquerays.media.config;
+package cyou.obliquerays.config;
