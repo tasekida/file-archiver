@@ -46,11 +46,11 @@ import jakarta.json.bind.JsonbBuilder;
 import jakarta.json.bind.JsonbConfig;
 
 /**
- * GoogleAPIのJWTトークンを取得
+ * GoogleAPIのJsonWebTokenを取得
  */
-public class GoogleJwtToken implements Supplier<String> {
+public class GoogleJsonWebToken implements Supplier<String> {
     /** ロガー */
-    private static final Logger LOGGER = Logger.getLogger(GoogleJwtToken.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GoogleJsonWebToken.class.getName());
     /** 改行文字列の正規表現 */
     private static final Pattern LINE_FEED = Pattern.compile("\n");
     /** 秘密鍵開始位置の正規表現 */
@@ -65,7 +65,7 @@ public class GoogleJwtToken implements Supplier<String> {
     private static final Base64.Encoder BASE64_URL_ENCODER = Base64.getUrlEncoder().withoutPadding();
 
     /** インスタンス */
-	private static GoogleJwtToken INSTANCE;
+	private static GoogleJsonWebToken INSTANCE;
 
 	/** サービスアカウントのメールアドレス */
 	private final String strServiceAccountsIssuer;
@@ -76,9 +76,9 @@ public class GoogleJwtToken implements Supplier<String> {
 
 	/**
 	 * コンストラクタ
-	 * @throws Exception GoogleAPIのJWTトークン取得処理の初期化に失敗
+	 * @throws Exception GoogleAPIのJsonWebToken取得処理の初期化に失敗
 	 */
-	private GoogleJwtToken() {
+	private GoogleJsonWebToken() {
 		String strServiceAccountsJson = Objects.requireNonNull(RadioProperties.getProperties().getProperty("service.accounts.json"));
 		this.strServiceAccountsIssuer = Objects.requireNonNull(RadioProperties.getProperties().getProperty("service.accounts.issuer"));
 
@@ -105,7 +105,7 @@ public class GoogleJwtToken implements Supplier<String> {
 	}
 
 	/**
-	 * GoogleAPIのJWTトークンを取得
+	 * GoogleAPIのJsonWebTokenを取得
 	 */
 	@Override
 	public String get() {
@@ -162,11 +162,11 @@ public class GoogleJwtToken implements Supplier<String> {
 	 * インスタンス取得
 	 * @return インスタンス取得へアクセス
 	 */
-	public static GoogleJwtToken getInstance() {
+	public static GoogleJsonWebToken getInstance() {
 		if (null == INSTANCE) {
-			synchronized (GoogleJwtToken.class) {
+			synchronized (GoogleJsonWebToken.class) {
 				if (null == INSTANCE) {
-					INSTANCE = new GoogleJwtToken();
+					INSTANCE = new GoogleJsonWebToken();
 				}
 			}
 		}

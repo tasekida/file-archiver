@@ -41,9 +41,9 @@ import org.junit.jupiter.api.Test;
 /**
  * GoogleJwtTokenのUnitTest
  */
-class GoogleJwtTokenTest {
+class GoogleJsonWebTokenTest {
     /** ロガー */
-    private static final Logger LOGGER = Logger.getLogger(GoogleJwtTokenTest.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GoogleJsonWebTokenTest.class.getName());
 
 	/**
 	 * @throws java.lang.Exception
@@ -71,7 +71,7 @@ class GoogleJwtTokenTest {
 
 	@Test
 	void testGet() throws IOException, InterruptedException {
-		GoogleJwtToken token = GoogleJwtToken.getInstance();
+		GoogleJsonWebToken token = GoogleJsonWebToken.getInstance();
 		String signedJwt = token.get();
 
 		HttpClient client =	HttpClient.newBuilder()
