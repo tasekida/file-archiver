@@ -26,9 +26,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-/**
- * GoogleAccessTokenのUnitTest
- */
+/** GoogleAccessTokenのUnitTest */
 class GoogleAccessTokenTest {
     /** ロガー */
     private static final Logger LOGGER = Logger.getLogger(GoogleJsonWebTokenTest.class.getName());

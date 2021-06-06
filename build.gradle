@@ -1,7 +1,7 @@
 plugins {
     id 'application'
     id 'eclipse'
-    id 'org.javamodularity.moduleplugin' version '1.7.0'
+    id "org.javamodularity.moduleplugin" version "1.8.7"
 }
 
 wrapper.gradleVersion = '7.0.2'
@@ -20,11 +20,14 @@ dependencies {
     implementation 'jakarta.json.bind:jakarta.json.bind-api:2.0.0'
     implementation 'org.eclipse:yasson:2.0.2'
 
+    testImplementation 'com.google.api-client:google-api-client:1.31.5'
+    testImplementation 'com.auth0:java-jwt:3.16.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine'
 }
 
 application {
+    mainModule = 'radio.archive'
     mainClass = 'cyou.obliquerays.media.RadioArchiveProcess'
 }
 
@@ -68,12 +71,16 @@ tasks.withType(Javadoc) {
     options {
         memberLevel = JavadocMemberLevel.PRIVATE
         encoding = 'UTF-8'
-        links("https://docs.oracle.com/javase/jp/11/docs/api/")
+        links('https://docs.oracle.com/javase/jp/11/docs/api/')
     }
 }
 
 compileTestJava {
-    onlyIf { project.hasProperty('goTest') }
+//    onlyIf { project.hasProperty('goTest') }
+	options.compilerArgs += '-Xlint:deprecation'
+    moduleOptions {
+        compileOnClasspath = true
+    }
 }
 
 test {
