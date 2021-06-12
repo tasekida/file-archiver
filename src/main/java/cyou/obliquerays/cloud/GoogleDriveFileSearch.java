@@ -48,7 +48,7 @@ public class GoogleDriveFileSearch implements UnaryOperator<String> {
 	 */
 	private GoogleDriveFileSearch() {
 		this.client =	HttpClient.newBuilder()
-                .version(Version.HTTP_2)
+                .version(Version.HTTP_1_1)
                 .followRedirects(Redirect.NORMAL)
                 .connectTimeout(Duration.ofSeconds(30))
                 .proxy(HttpClient.Builder.NO_PROXY)
@@ -65,10 +65,11 @@ public class GoogleDriveFileSearch implements UnaryOperator<String> {
 		try {
 			HttpRequest request = HttpRequest.newBuilder()
 	                .uri(URI.create("https://www.googleapis.com/drive/v3/files"))
+//	                .uri(URI.create("https://www.googleapis.com/drive/v3/files?key=AIzaSyDmPJxqICDWpvzqpTr0H29dnUDnmNOGktM"))
 	                .timeout(Duration.ofMinutes(30))
-	                .header("Accept", "application/json")
+//	                .header("Accept", "application/json")
 	                .header("Authorization", "Bearer " + accessToken)
-	                .header(_accessToken, accessToken)
+//	                .header(_accessToken, accessToken)
 	                .GET()
 	                .build();
 	        LOGGER.log(Level.CONFIG, "google access token request body = " + request.toString());

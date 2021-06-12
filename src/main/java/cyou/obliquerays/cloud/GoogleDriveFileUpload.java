@@ -15,12 +15,17 @@
  */
 package cyou.obliquerays.cloud;
 
+import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpClient.Redirect;
 import java.net.http.HttpClient.Version;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -47,19 +52,31 @@ public class GoogleDriveFileUpload implements UnaryOperator<String> {
                 .connectTimeout(Duration.ofSeconds(30))
                 .proxy(HttpClient.Builder.NO_PROXY)
                 .build();
-
 	}
 
 	/**
 	 * スケルトン
 	 */
 	@Override
-	public String apply(String _skeleton) {
-		String skeleton = Objects.requireNonNull(_skeleton);
+	public String apply(String _accessToken) {
+		String accessToken = Objects.requireNonNull(_accessToken);
 
 		try {
+			HttpRequest request = HttpRequest.newBuilder()
+	                .uri(URI.create("https://www.googleapis.com/drive/v3/files?fields=nextPageToken,%20files(id,%20name)"))
+	                .timeout(Duration.ofMinutes(30))
+	                .header("Accept-Encoding", "gzip")
+	                .header("Authorization", "Bearer " + accessToken)
+	                .GET()
+	                .build();
+	        LOGGER.log(Level.CONFIG, "google access token request body = " + request.toString());
 
-			return skeleton;
+	        HttpResponse<String> response = this.client.send(request, BodyHandlers.ofString());
+
+	        LOGGER.log(Level.INFO, "google access token responce code = " + response.statusCode());
+	        LOGGER.log(Level.CONFIG, "google access token responce body = " + response.body());
+
+			return response.body();
 
 		} catch (Exception e) {
 

@@ -38,32 +38,31 @@ import jakarta.json.bind.JsonbConfig;
 /**
  * GoogleAPIのAccessTokenを取得
  */
-public class GoogleAccessToken implements UnaryOperator<String> {
+public class GoogleJWTAccessToken implements UnaryOperator<String> {
     /** ロガー */
-    private static final Logger LOGGER = Logger.getLogger(GoogleAccessToken.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GoogleJWTAccessToken.class.getName());
 
     /** インスタンス */
-	private static GoogleAccessToken INSTANCE;
+	private static GoogleJWTAccessToken INSTANCE;
 
 	/** HTTPクライアント */
 	private final HttpClient client;
 	/** HTTP Postパラメータのベース */
-	private final String bodyBase;
+	private final String grantTypeParam;
 
 	/**
 	 * コンストラクタ
 	 * @throws Exception GoogleAPIのAccessToken取得処理の初期化に失敗
 	 */
-	private GoogleAccessToken() {
+	private GoogleJWTAccessToken() {
 		this.client =	HttpClient.newBuilder()
-                .version(Version.HTTP_2)
+                .version(Version.HTTP_1_1)
                 .followRedirects(Redirect.NORMAL)
                 .connectTimeout(Duration.ofSeconds(30))
                 .proxy(HttpClient.Builder.NO_PROXY)
                 .build();
-		this.bodyBase = new StringBuilder("grant_type=")
-				.append(URLEncoder.encode("urn:ietf:params:oauth:grant-type:jwt-bearer", StandardCharsets.UTF_8))
-				.append("&assertion=").toString();
+		this.grantTypeParam = URLEncoder.encode("urn:ietf:params:oauth:grant-type:jwt-bearer", StandardCharsets.UTF_8);
+//		this.grantTypeParam = "urn:ietf:params:oauth:grant-type:jwt-bearer";
 	}
 
 	/**
@@ -74,8 +73,12 @@ public class GoogleAccessToken implements UnaryOperator<String> {
 
 		try (Jsonb jsonb = JsonbBuilder.create(new JsonbConfig().withFormatting(false))) {
 
-			String body = new StringBuilder(this.bodyBase)
-					.append(_signedJwt).toString();
+			String body = new StringBuilder()
+					.append("grant_type=")
+					.append(this.grantTypeParam)
+					.append("&assertion=")
+					.append(_signedJwt)
+					.toString();
 
 	        HttpRequest request = HttpRequest.newBuilder()
 	                .uri(URI.create("https://oauth2.googleapis.com/token"))
@@ -105,11 +108,11 @@ public class GoogleAccessToken implements UnaryOperator<String> {
 	 * インスタンス取得
 	 * @return インスタンス取得へアクセス
 	 */
-	public static GoogleAccessToken getInstance() {
+	public static GoogleJWTAccessToken getInstance() {
 		if (null == INSTANCE) {
-			synchronized (GoogleAccessToken.class) {
+			synchronized (GoogleJWTAccessToken.class) {
 				if (null == INSTANCE) {
-					INSTANCE = new GoogleAccessToken();
+					INSTANCE = new GoogleJWTAccessToken();
 				}
 			}
 		}

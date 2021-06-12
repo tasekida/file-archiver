@@ -26,10 +26,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-/** GoogleAccessTokenのUnitTest */
-class GoogleAccessTokenTest {
+/** GoogleDriveFileUploadTestのUnitTest */
+class GoogleDriveFileUploadTest {
     /** ロガー */
-    private static final Logger LOGGER = Logger.getLogger(GoogleJsonWebTokenTest.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GoogleDriveFileUploadTest.class.getName());
 
 	/** @throws java.lang.Exception */
 	@BeforeAll
@@ -43,28 +43,24 @@ class GoogleAccessTokenTest {
 
 	/** @throws java.lang.Exception */
 	@AfterAll
-	static void tearDownAfterClass() throws Exception {
-	}
+	static void tearDownAfterClass() throws Exception {}
 
 	/** @throws java.lang.Exception */
 	@BeforeEach
-	void setUp() throws Exception {
-	}
+	void setUp() throws Exception {	}
 
 	/** @throws java.lang.Exception */
 	@AfterEach
-	void tearDown() throws Exception {
-	}
+	void tearDown() throws Exception {}
 
-	/**
-	 * {@link cyou.obliquerays.cloud.GoogleAccessToken#apply(java.lang.String)} のためのテスト・メソッド。
-	 */
 	@Test
 	void testApply() {
 		GoogleJsonWebToken jwt = GoogleJsonWebToken.getInstance();
-		GoogleAccessToken gtoken = GoogleAccessToken.getInstance();
+		GoogleJWTAccessToken gtoken = GoogleJWTAccessToken.getInstance();
+		GoogleDriveFileUpload gDriveFileUpload = GoogleDriveFileUpload.getInstance();
 
 		String strToken = gtoken.apply(jwt.get());
+		gDriveFileUpload.apply(strToken);
 
 		LOGGER.log(Level.INFO, strToken);
 	}
