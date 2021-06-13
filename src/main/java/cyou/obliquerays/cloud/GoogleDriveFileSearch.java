@@ -28,6 +28,10 @@ import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
+import jakarta.json.bind.JsonbConfig;
+
 /**
  * GoogleAPIのFiles:listを実行<br>
  * https://developers.google.com/drive/api/v3/reference/files/list
@@ -62,14 +66,15 @@ public class GoogleDriveFileSearch implements UnaryOperator<String> {
 	public String apply(String _accessToken) {
 		String accessToken = Objects.requireNonNull(_accessToken);
 
-		try {
+		try (Jsonb jsonb = JsonbBuilder.create(new JsonbConfig().withFormatting(false))) {
+
+			StringBuilder strUri = new StringBuilder("https://www.googleapis.com/drive/v3/files");
+			strUri.append("?fields=nextPageToken,%20files(id,%20name)");
+
 			HttpRequest request = HttpRequest.newBuilder()
-	                .uri(URI.create("https://www.googleapis.com/drive/v3/files"))
-//	                .uri(URI.create("https://www.googleapis.com/drive/v3/files?key=AIzaSyDmPJxqICDWpvzqpTr0H29dnUDnmNOGktM"))
+	                .uri(URI.create(strUri.toString()))
 	                .timeout(Duration.ofMinutes(30))
-//	                .header("Accept", "application/json")
 	                .header("Authorization", "Bearer " + accessToken)
-//	                .header(_accessToken, accessToken)
 	                .GET()
 	                .build();
 	        LOGGER.log(Level.CONFIG, "google access token request body = " + request.toString());
@@ -79,7 +84,18 @@ public class GoogleDriveFileSearch implements UnaryOperator<String> {
 	        LOGGER.log(Level.INFO, "google access token responce code = " + response.statusCode());
 	        LOGGER.log(Level.CONFIG, "google access token responce body = " + response.body());
 
-			return response.body();
+	        String strResponseBody = response.body();
+
+//	        FIXME
+//	        @SuppressWarnings("unchecked")
+//			Map<String, Object> responseBody = jsonb.fromJson(strResponseBody, Map.class);
+//
+//	        boolean incompleteSearch = (boolean) responseBody.get("incompleteSearch");
+//	        String kind = (String) responseBody.get("kind");
+//	        @SuppressWarnings("unchecked")
+//			List<Map<String, String>> files = (List<Map<String, String>>) responseBody.get("files");
+
+			return strResponseBody;
 
 		} catch (Exception e) {
 

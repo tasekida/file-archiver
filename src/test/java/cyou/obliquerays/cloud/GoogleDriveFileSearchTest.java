@@ -169,7 +169,7 @@ class GoogleDriveFileSearchTest {
 	    JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 	    String TOKENS_DIRECTORY_PATH = "tokens";
 
-	    List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE_METADATA_READONLY);
+	    List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE);
 	    String CREDENTIALS_FILE_PATH = "/credentials.json";
 
         NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
