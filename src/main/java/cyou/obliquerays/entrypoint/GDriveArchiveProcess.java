@@ -18,14 +18,19 @@ package cyou.obliquerays.entrypoint;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
+import cyou.obliquerays.config.RadioProperties;
+import cyou.obliquerays.io.LocalFileSearch;
 import cyou.obliquerays.status.LockFileStatus;
+import cyou.obliquerays.tools.TsMediaTool;
 
 
 /**
@@ -57,19 +62,20 @@ public class GDriveArchiveProcess {
 	public void execute() throws InterruptedException {
 
 		try {
-
-			LOGGER.log(Level.INFO, "プロトタイプ");
-
+			LocalFileSearch LocalFileSearch = new LocalFileSearch();
+			do {
+				List<Path> localFiles = LocalFileSearch.search();
+				List<Path> mp3Files = localFiles.stream().filter(TsMediaTool.predicateMp3Path()).collect(Collectors.toList());
+				// FIXME 送信処理を書く
+				mp3Files.stream().forEach(p -> LOGGER.log(Level.INFO, "送信対象ファイル = "+ p.toString()));
+				TimeUnit.MINUTES.sleep(5);
+			} while (RadioProperties.getProperties().isProcess());
 		} catch (Exception e) {
-
 			LOGGER.log(Level.SEVERE, "エラー終了", e);
-
 		} finally {
-
 			this.executor.shutdown();
 			if (!this.executor.awaitTermination(10L, TimeUnit.SECONDS) && !this.executor.isTerminated())
 				this.executor.shutdownNow();
-
 		}
 	}
 
