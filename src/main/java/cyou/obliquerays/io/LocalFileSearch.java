@@ -45,12 +45,12 @@ public class LocalFileSearch {
 	 */
 	public List<Path> search() throws IOException {
 
-		List<Path> target = new ArrayList<>(0);
+		List<Path> files = new ArrayList<>(0);
 		try {
 			Files.walkFileTree(Path.of(RadioProperties.getProperties().getBaseDir()), new SimpleFileVisitor<Path>() {
 			    @Override
 			    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-			    	target.add(file);
+			    	files.add(file);
 			    	return FileVisitResult.CONTINUE;
 				}
 			});
@@ -59,6 +59,6 @@ public class LocalFileSearch {
 			throw e;
 		}
 
-		return target;
+		return files;
 	}
 }

@@ -15,19 +15,31 @@
  */
 package cyou.obliquerays.cloud;
 
+import java.nio.file.Path;
+import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 /**
- * Skeleton
+ * Google Drive 送信処理
  */
-public class GDriveFileClient {
+public class GDriveFileSendClient implements Consumer<Path> {
     /** ロガー */
-    private static final Logger LOGGER = Logger.getLogger(GDriveFileClient.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GDriveFileSendClient.class.getName());
+
+	/** コンストラクタ */
+	public GDriveFileSendClient() {}
 
 	/**
-	 * コンストラクタ
+	 * Google Drive 送信処理<br>
+	 * 送信に成功した場合、すでに送信済みの場合は、ローカルファイルを削除
 	 */
-	public GDriveFileClient() {
-		// skeleton
+	public void send() {
+		// FIXME 送信
+	}
+
+	@Override
+	public void accept(Path _sourceFile) {
+		Path sourceFile = Objects.requireNonNull(_sourceFile);
 	}
 }

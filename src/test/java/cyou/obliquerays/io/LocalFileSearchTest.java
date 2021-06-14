@@ -22,12 +22,15 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import cyou.obliquerays.tools.TsMediaTool;
 
 /** LocalFileSearchTestのUnitTest */
 class LocalFileSearchTest {
@@ -64,6 +67,11 @@ class LocalFileSearchTest {
 	void testSearch() throws IOException {
 		LocalFileSearch localFileSearch = new LocalFileSearch();
 		List<Path> localFiles = localFileSearch.search();
-		localFiles.stream().forEach(System.out::println);
+
+		List<Path> mp3Files = localFiles.stream().filter(TsMediaTool.predicateMp3Path()).collect(Collectors.toList());
+		mp3Files.stream().forEach(System.out::println);
+
+		List<Path> tsFiles = localFiles.stream().filter(TsMediaTool.predicateTsPath()).collect(Collectors.toList());
+		tsFiles.stream().forEach(System.out::println);
 	}
 }

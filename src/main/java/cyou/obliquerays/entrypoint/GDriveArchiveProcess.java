@@ -25,8 +25,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
+import cyou.obliquerays.cloud.GDriveFileSendClient;
 import cyou.obliquerays.config.RadioProperties;
 import cyou.obliquerays.io.LocalFileSearch;
 import cyou.obliquerays.status.LockFileStatus;
@@ -65,9 +65,11 @@ public class GDriveArchiveProcess {
 			LocalFileSearch LocalFileSearch = new LocalFileSearch();
 			do {
 				List<Path> localFiles = LocalFileSearch.search();
-				List<Path> mp3Files = localFiles.stream().filter(TsMediaTool.predicateMp3Path()).collect(Collectors.toList());
+				localFiles.stream()
+					.filter(TsMediaTool.predicateMp3Path())
+					.forEach(new GDriveFileSendClient());
 				// FIXME 送信処理を書く
-				mp3Files.stream().forEach(p -> LOGGER.log(Level.INFO, "送信対象ファイル = "+ p.toString()));
+//				mp3Files.stream().forEach(p -> LOGGER.log(Level.INFO, "送信対象ファイル = "+ p.toString()));
 				TimeUnit.MINUTES.sleep(5);
 			} while (RadioProperties.getProperties().isProcess());
 		} catch (Exception e) {
