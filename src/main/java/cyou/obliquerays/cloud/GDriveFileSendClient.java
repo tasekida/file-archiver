@@ -34,12 +34,9 @@ public class GDriveFileSendClient implements Consumer<Path> {
 	 * Google Drive 送信処理<br>
 	 * 送信に成功した場合、すでに送信済みの場合は、ローカルファイルを削除
 	 */
-	public void send() {
-		// FIXME 送信
-	}
-
 	@Override
 	public void accept(Path _sourceFile) {
 		Path sourceFile = Objects.requireNonNull(_sourceFile);
+		
 	}
 }

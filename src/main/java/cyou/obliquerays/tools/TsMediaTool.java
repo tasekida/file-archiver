@@ -43,7 +43,7 @@ public class TsMediaTool {
 	 * MP3ファイルを判定するPredicateを取得
 	 * @return MP3ファイルを判定するPredicate
 	 */
-	public static Predicate<Path> predicateMp3Path () {
+	public static synchronized Predicate<Path> predicateMp3Path () {
 		return p -> MP3_FILE_PATERN.matcher(p.toAbsolutePath().normalize().toString()).matches();
 	}
 
@@ -51,7 +51,7 @@ public class TsMediaTool {
 	 * TSファイルを判定するPredicateを取得
 	 * @return TSファイルを判定するPredicate
 	 */
-	public static Predicate<Path> predicateTsPath () {
+	public static synchronized Predicate<Path> predicateTsPath () {
 		return p -> TS_FILE_PATERN.matcher(p.toAbsolutePath().normalize().toString()).matches();
 	}
 

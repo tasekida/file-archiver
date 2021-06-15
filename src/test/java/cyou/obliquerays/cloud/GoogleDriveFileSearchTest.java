@@ -15,15 +15,19 @@
  */
 package cyou.obliquerays.cloud;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpClient.Redirect;
 import java.net.http.HttpClient.Version;
 import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
@@ -34,6 +38,7 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -47,6 +52,7 @@ import org.junit.jupiter.api.Test;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.auth.oauth2.StoredCredential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
@@ -63,6 +69,9 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 
 import cyou.obliquerays.config.RadioProperties;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
+import jakarta.json.bind.JsonbConfig;
 
 /** GoogleDriveFileSearchTestのUnitTest */
 class GoogleDriveFileSearchTest {
@@ -226,5 +235,57 @@ class GoogleDriveFileSearchTest {
 		gDriveFileSearch.apply(strToken);
 
 		LOGGER.log(Level.INFO, strToken);
+	}
+
+	/**
+	 * {@link cyou.obliquerays.cloud.GoogleDriveFileSearch#apply(java.lang.String)} のためのテスト・メソッド。
+	 * @throws Exception
+	 */
+	@Test
+	void testOAuth2Example03() {
+
+//		HashMap<String, byte[]> keyValueMap = new FileInputStream(dataFile);
+//		StoredCredential stored = (StoredCredential) new ObjectInputStream(ByteArrayInputStream).readObject();
+
+		try (InputStream inStore = ClassLoader.getSystemResourceAsStream(RadioProperties.getProperties().getProperty("google.credentials.stored"));
+				ObjectInputStream objectInStore = new ObjectInputStream(new ByteArrayInputStream(inStore.readAllBytes()));
+				InputStream inJson = ClassLoader.getSystemResourceAsStream(RadioProperties.getProperties().getProperty("google.credentials.json"));
+				Jsonb jsonb = JsonbBuilder.create(new JsonbConfig().withFormatting(false))) {
+
+			Map<String, byte[]> stored = (Map<String, byte[]>) objectInStore.readObject();
+
+			StoredCredential storedObj = (StoredCredential) new ObjectInputStream(new ByteArrayInputStream(stored.get("user"))).readObject();
+
+			@SuppressWarnings("unchecked")
+			Map<String, Object> credentials = jsonb.fromJson(inJson, Map.class);
+			@SuppressWarnings("unchecked")
+			Map<String, Object> installed = (Map<String, Object>) credentials.get("installed");
+
+			HttpClient client1 = HttpClient.newBuilder()
+					.version(Version.HTTP_2).followRedirects(Redirect.NORMAL)
+					.connectTimeout(Duration.ofSeconds(30)).proxy(HttpClient.Builder.NO_PROXY).build();
+
+			StringBuilder strParam1 = new StringBuilder("")
+					.append("grant_type").append("=").append("refresh_token")
+					.append("&").append("refresh_token").append("=").append(storedObj.getRefreshToken())
+					.append("&").append("client_id").append("=").append(installed.get("client_id").toString())
+					.append("&").append("client_secret").append("=").append(installed.get("client_secret").toString());
+
+			HttpRequest request1 = HttpRequest.newBuilder()
+	                .uri(URI.create("https://oauth2.googleapis.com/token"))
+	                .timeout(Duration.ofMinutes(30))
+	                .header("Accept-Encoding", "gzip")
+	                .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+	                .POST(BodyPublishers.ofString(URLEncoder.encode(strParam1.toString(), StandardCharsets.UTF_8)))
+	                .build();
+		} catch (IOException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		} catch (Exception e1) {
+			// TODO 自動生成された catch ブロック
+			e1.printStackTrace();
+		}
+
+//		LOGGER.log(Level.INFO, strToken);
 	}
 }

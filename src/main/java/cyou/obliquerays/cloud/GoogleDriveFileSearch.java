@@ -52,7 +52,7 @@ public class GoogleDriveFileSearch implements UnaryOperator<String> {
 	 */
 	private GoogleDriveFileSearch() {
 		this.client =	HttpClient.newBuilder()
-                .version(Version.HTTP_1_1)
+                .version(Version.HTTP_2)
                 .followRedirects(Redirect.NORMAL)
                 .connectTimeout(Duration.ofSeconds(30))
                 .proxy(HttpClient.Builder.NO_PROXY)

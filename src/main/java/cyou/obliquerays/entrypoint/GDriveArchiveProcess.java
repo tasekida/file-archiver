@@ -25,12 +25,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import cyou.obliquerays.cloud.GDriveFileSendClient;
 import cyou.obliquerays.config.RadioProperties;
 import cyou.obliquerays.io.LocalFileSearch;
 import cyou.obliquerays.status.LockFileStatus;
-import cyou.obliquerays.tools.TsMediaTool;
 
 
 /**
@@ -62,14 +62,14 @@ public class GDriveArchiveProcess {
 	public void execute() throws InterruptedException {
 
 		try {
+			Pattern mp3FilePatern = Pattern.compile(".+\\.mp3$");
 			LocalFileSearch LocalFileSearch = new LocalFileSearch();
 			do {
 				List<Path> localFiles = LocalFileSearch.search();
 				localFiles.stream()
-					.filter(TsMediaTool.predicateMp3Path())
+					.map(p -> p.toAbsolutePath().normalize())
+					.filter(p -> mp3FilePatern.matcher(p.toString()).matches())
 					.forEach(new GDriveFileSendClient());
-				// FIXME 送信処理を書く
-//				mp3Files.stream().forEach(p -> LOGGER.log(Level.INFO, "送信対象ファイル = "+ p.toString()));
 				TimeUnit.MINUTES.sleep(5);
 			} while (RadioProperties.getProperties().isProcess());
 		} catch (Exception e) {

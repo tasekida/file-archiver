@@ -64,7 +64,7 @@ public class GoogleOAuth2AccessToken implements Supplier<String> {
 	        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(jsonFactory, new InputStreamReader(in));
 
 	        NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-		    List<String> scopes = Collections.singletonList("https://www.googleapis.com/auth/drive");
+		    List<String> scopes = Collections.singletonList("https://www.googleapis.com/auth/drive.appdata");
 
 	        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
 	                httpTransport, jsonFactory, clientSecrets, scopes)
