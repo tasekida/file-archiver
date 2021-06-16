@@ -15,6 +15,7 @@
  */
 package cyou.obliquerays.cloud;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -22,7 +23,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpClient.Redirect;
 import java.net.http.HttpClient.Version;
@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -244,9 +245,6 @@ class GoogleDriveFileSearchTest {
 	@Test
 	void testOAuth2Example03() {
 
-//		HashMap<String, byte[]> keyValueMap = new FileInputStream(dataFile);
-//		StoredCredential stored = (StoredCredential) new ObjectInputStream(ByteArrayInputStream).readObject();
-
 		try (InputStream inStore = ClassLoader.getSystemResourceAsStream(RadioProperties.getProperties().getProperty("google.credentials.stored"));
 				ObjectInputStream objectInStore = new ObjectInputStream(new ByteArrayInputStream(inStore.readAllBytes()));
 				InputStream inJson = ClassLoader.getSystemResourceAsStream(RadioProperties.getProperties().getProperty("google.credentials.json"));
@@ -276,8 +274,18 @@ class GoogleDriveFileSearchTest {
 	                .timeout(Duration.ofMinutes(30))
 	                .header("Accept-Encoding", "gzip")
 	                .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-	                .POST(BodyPublishers.ofString(URLEncoder.encode(strParam1.toString(), StandardCharsets.UTF_8)))
+	                .POST(BodyPublishers.ofString(strParam1.toString()))
 	                .build();
+
+			HttpResponse<InputStream> response = client1.send(request1, BodyHandlers.ofInputStream());
+
+			InputStream gin = new GZIPInputStream(response.body());
+			Map<String, Object> tokenResponse = jsonb.fromJson(gin, Map.class);
+
+			BufferedReader reader = new BufferedReader(new InputStreamReader(gin));
+
+			reader.lines().forEach(s -> LOGGER.log(Level.INFO, s));
+
 		} catch (IOException e) {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
