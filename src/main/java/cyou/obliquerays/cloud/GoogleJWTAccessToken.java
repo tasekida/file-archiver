@@ -55,8 +55,8 @@ public class GoogleJWTAccessToken implements UnaryOperator<String> {
 	 * @throws Exception GoogleAPIのAccessToken取得処理の初期化に失敗
 	 */
 	private GoogleJWTAccessToken() {
-		this.client =	HttpClient.newBuilder()
-                .version(Version.HTTP_1_1)
+		this.client = HttpClient.newBuilder()
+                .version(Version.HTTP_2)
                 .followRedirects(Redirect.NORMAL)
                 .connectTimeout(Duration.ofSeconds(30))
                 .proxy(HttpClient.Builder.NO_PROXY)
@@ -83,7 +83,9 @@ public class GoogleJWTAccessToken implements UnaryOperator<String> {
 	        HttpRequest request = HttpRequest.newBuilder()
 	                .uri(URI.create("https://oauth2.googleapis.com/token"))
 	                .timeout(Duration.ofMinutes(30))
-	                .header("Content-Type", "application/x-www-form-urlencoded")
+	                .timeout(Duration.ofMinutes(30))
+	                .header("Accept-Encoding", "gzip")
+	                .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
 	                .POST(BodyPublishers.ofString(body))
 	                .build();
 	        LOGGER.log(Level.CONFIG, "google access token request body = " + request.toString());
@@ -94,9 +96,9 @@ public class GoogleJWTAccessToken implements UnaryOperator<String> {
 	        LOGGER.log(Level.CONFIG, "google access token responce body = " + response.body());
 
 	        @SuppressWarnings("unchecked")
-			Map<String, String> responseParam = jsonb.fromJson(response.body(), Map.class);
+			Map<String, Object> responseParam = jsonb.fromJson(response.body(), Map.class);
 
-			return responseParam.get("access_token");
+			return responseParam.get("access_token").toString();
 
 		} catch (Exception e) {
 

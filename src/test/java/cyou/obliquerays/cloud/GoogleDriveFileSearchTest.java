@@ -15,7 +15,6 @@
  */
 package cyou.obliquerays.cloud;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -35,6 +34,8 @@ import java.security.PrivateKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -69,6 +70,7 @@ import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 
+import cyou.obliquerays.cloud.pojo.GDriveFile;
 import cyou.obliquerays.config.RadioProperties;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
@@ -233,9 +235,9 @@ class GoogleDriveFileSearchTest {
 
 		String strToken = goat.get();
 
-		gDriveFileSearch.apply(strToken);
+		List<GDriveFile> files = gDriveFileSearch.apply(strToken);
 
-		LOGGER.log(Level.INFO, strToken);
+		files.forEach(s -> LOGGER.log(Level.INFO, s.toString()));
 	}
 
 	/**
@@ -249,42 +251,55 @@ class GoogleDriveFileSearchTest {
 				ObjectInputStream objectInStore = new ObjectInputStream(new ByteArrayInputStream(inStore.readAllBytes()));
 				InputStream inJson = ClassLoader.getSystemResourceAsStream(RadioProperties.getProperties().getProperty("google.credentials.json"));
 				Jsonb jsonb = JsonbBuilder.create(new JsonbConfig().withFormatting(false))) {
+			String accessToken = "";
 
 			Map<String, byte[]> stored = (Map<String, byte[]>) objectInStore.readObject();
 
 			StoredCredential storedObj = (StoredCredential) new ObjectInputStream(new ByteArrayInputStream(stored.get("user"))).readObject();
 
-			@SuppressWarnings("unchecked")
-			Map<String, Object> credentials = jsonb.fromJson(inJson, Map.class);
-			@SuppressWarnings("unchecked")
-			Map<String, Object> installed = (Map<String, Object>) credentials.get("installed");
+			LocalDateTime expiration =
+					LocalDateTime.ofInstant(Instant.ofEpochMilli(storedObj.getExpirationTimeMilliseconds()), ZoneId.systemDefault());
+			if (expiration.isBefore(LocalDateTime.now())) {
+				@SuppressWarnings("unchecked")
+				Map<String, Object> credentials = jsonb.fromJson(inJson, Map.class);
+				@SuppressWarnings("unchecked")
+				Map<String, Object> installed = (Map<String, Object>) credentials.get("installed");
 
-			HttpClient client1 = HttpClient.newBuilder()
-					.version(Version.HTTP_2).followRedirects(Redirect.NORMAL)
-					.connectTimeout(Duration.ofSeconds(30)).proxy(HttpClient.Builder.NO_PROXY).build();
+				HttpClient client1 = HttpClient.newBuilder()
+						.version(Version.HTTP_2).followRedirects(Redirect.NORMAL)
+						.connectTimeout(Duration.ofSeconds(30)).proxy(HttpClient.Builder.NO_PROXY).build();
 
-			StringBuilder strParam1 = new StringBuilder("")
-					.append("grant_type").append("=").append("refresh_token")
-					.append("&").append("refresh_token").append("=").append(storedObj.getRefreshToken())
-					.append("&").append("client_id").append("=").append(installed.get("client_id").toString())
-					.append("&").append("client_secret").append("=").append(installed.get("client_secret").toString());
+				StringBuilder strParam1 = new StringBuilder("")
+						.append("grant_type").append("=").append("refresh_token")
+						.append("&").append("refresh_token").append("=").append(storedObj.getRefreshToken())
+						.append("&").append("client_id").append("=").append(installed.get("client_id").toString())
+						.append("&").append("client_secret").append("=").append(installed.get("client_secret").toString());
 
-			HttpRequest request1 = HttpRequest.newBuilder()
-	                .uri(URI.create("https://oauth2.googleapis.com/token"))
-	                .timeout(Duration.ofMinutes(30))
-	                .header("Accept-Encoding", "gzip")
-	                .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-	                .POST(BodyPublishers.ofString(strParam1.toString()))
-	                .build();
+				HttpRequest request1 = HttpRequest.newBuilder()
+		                .uri(URI.create("https://oauth2.googleapis.com/token"))
+		                .timeout(Duration.ofMinutes(30))
+		                .header("Accept-Encoding", "gzip")
+		                .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+		                .POST(BodyPublishers.ofString(strParam1.toString()))
+		                .build();
 
-			HttpResponse<InputStream> response = client1.send(request1, BodyHandlers.ofInputStream());
+				HttpResponse<InputStream> response = client1.send(request1, BodyHandlers.ofInputStream());
 
-			InputStream gin = new GZIPInputStream(response.body());
-			Map<String, Object> tokenResponse = jsonb.fromJson(gin, Map.class);
+				InputStream gin = new GZIPInputStream(response.body());
+				@SuppressWarnings("unchecked")
+				Map<String, Object> tokenResponse = jsonb.fromJson(gin, Map.class);
 
-			BufferedReader reader = new BufferedReader(new InputStreamReader(gin));
+				accessToken = tokenResponse.get("access_token").toString();
 
-			reader.lines().forEach(s -> LOGGER.log(Level.INFO, s));
+			} else {
+
+				accessToken = storedObj.getAccessToken();
+
+			}
+			LOGGER.log(Level.INFO, accessToken);
+
+			GoogleDriveFileSearch gDriveFileSearch = GoogleDriveFileSearch.getInstance();
+			gDriveFileSearch.apply(accessToken);
 
 		} catch (IOException e) {
 			// TODO 自動生成された catch ブロック

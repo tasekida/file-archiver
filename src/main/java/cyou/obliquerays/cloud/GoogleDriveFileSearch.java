@@ -23,11 +23,14 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
+import java.util.List;
 import java.util.Objects;
-import java.util.function.UnaryOperator;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import cyou.obliquerays.cloud.pojo.GDriveFile;
+import cyou.obliquerays.cloud.pojo.GDriveSearchFile;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import jakarta.json.bind.JsonbConfig;
@@ -36,7 +39,7 @@ import jakarta.json.bind.JsonbConfig;
  * GoogleAPIのFiles:listを実行<br>
  * https://developers.google.com/drive/api/v3/reference/files/list
  */
-public class GoogleDriveFileSearch implements UnaryOperator<String> {
+public class GoogleDriveFileSearch implements Function<String, List<GDriveFile>> {
     /** ロガー */
     private static final Logger LOGGER = Logger.getLogger(GoogleDriveFileSearch.class.getName());
 
@@ -63,7 +66,7 @@ public class GoogleDriveFileSearch implements UnaryOperator<String> {
 	 * スケルトン
 	 */
 	@Override
-	public String apply(String _accessToken) {
+	public List<GDriveFile> apply(String _accessToken) {
 		String accessToken = Objects.requireNonNull(_accessToken);
 
 		try (Jsonb jsonb = JsonbBuilder.create(new JsonbConfig().withFormatting(false))) {
@@ -85,17 +88,9 @@ public class GoogleDriveFileSearch implements UnaryOperator<String> {
 	        LOGGER.log(Level.CONFIG, "google access token responce body = " + response.body());
 
 	        String strResponseBody = response.body();
+	        GDriveSearchFile gDriveSearchFile = jsonb.fromJson(strResponseBody, GDriveSearchFile.class);
 
-//	        FIXME
-//	        @SuppressWarnings("unchecked")
-//			Map<String, Object> responseBody = jsonb.fromJson(strResponseBody, Map.class);
-//
-//	        boolean incompleteSearch = (boolean) responseBody.get("incompleteSearch");
-//	        String kind = (String) responseBody.get("kind");
-//	        @SuppressWarnings("unchecked")
-//			List<Map<String, String>> files = (List<Map<String, String>>) responseBody.get("files");
-
-			return strResponseBody;
+			return gDriveSearchFile.getFiles();
 
 		} catch (Exception e) {
 

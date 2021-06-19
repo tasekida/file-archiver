@@ -16,9 +16,13 @@
 package cyou.obliquerays.cloud;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import cyou.obliquerays.cloud.pojo.GDriveFile;
 
 /**
  * Google Drive 送信処理
@@ -27,8 +31,14 @@ public class GDriveFileSendClient implements Consumer<Path> {
     /** ロガー */
     private static final Logger LOGGER = Logger.getLogger(GDriveFileSendClient.class.getName());
 
+    private GoogleOAuth2AccessToken goat = GoogleOAuth2AccessToken.getInstance();
+	private GoogleDriveFileSearch gDriveFileSearch = GoogleDriveFileSearch.getInstance();
+	private final List<GDriveFile> files;
+
 	/** コンストラクタ */
-	public GDriveFileSendClient() {}
+	public GDriveFileSendClient() {
+		this.files = this.gDriveFileSearch.apply(goat.get());
+	}
 
 	/**
 	 * Google Drive 送信処理<br>
@@ -37,6 +47,7 @@ public class GDriveFileSendClient implements Consumer<Path> {
 	@Override
 	public void accept(Path _sourceFile) {
 		Path sourceFile = Objects.requireNonNull(_sourceFile);
-		
+
+		files.forEach(s -> LOGGER.log(Level.CONFIG, s.toString()));
 	}
 }
