@@ -33,11 +33,11 @@ public class GDriveFileSendClient implements Consumer<Path> {
 
     private GoogleOAuth2AccessToken goat = GoogleOAuth2AccessToken.getInstance();
 	private GoogleDriveFileSearch gDriveFileSearch = GoogleDriveFileSearch.getInstance();
-	private final List<GDriveFile> files;
+	private final List<GDriveFile> googleFiles;
 
 	/** コンストラクタ */
 	public GDriveFileSendClient() {
-		this.files = this.gDriveFileSearch.apply(goat.get());
+		this.googleFiles = this.gDriveFileSearch.apply(goat.get());
 	}
 
 	/**
@@ -48,6 +48,6 @@ public class GDriveFileSendClient implements Consumer<Path> {
 	public void accept(Path _sourceFile) {
 		Path sourceFile = Objects.requireNonNull(_sourceFile);
 
-		files.forEach(s -> LOGGER.log(Level.CONFIG, s.toString()));
+		googleFiles.forEach(s -> LOGGER.log(Level.CONFIG, s.toString()));
 	}
 }

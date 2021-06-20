@@ -1,5 +1,5 @@
 /**
- *  Copyright 2021 takahiro
+ * Copyright (C) 2021 tasekida
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package cyou.obliquerays.io;
+package cyou.obliquerays.cloud;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,10 +30,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-/** LocalFileSearchTestのUnitTest */
-class LocalFileSearchTest {
+import cyou.obliquerays.io.LocalFileSearch;
+
+/** GDriveFileSendClientTestのUnitTest */
+class GDriveFileSendClientTest {
     /** ロガー */
-    private static final Logger LOGGER = Logger.getLogger(LocalFileSearchTest.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GDriveFileSendClientTest.class.getName());
 
 	/** @throws java.lang.Exception */
 	@BeforeAll
@@ -58,11 +60,12 @@ class LocalFileSearchTest {
 	void tearDown() throws Exception {}
 
 	/**
-	 * {@link cyou.obliquerays.io.LocalFileSearch#search()} のためのテスト・メソッド。
+	 * {@link cyou.obliquerays.cloud.GDriveFileSendClient#accept(java.nio.file.Path)} のためのテスト・メソッド。
 	 * @throws IOException
 	 */
 	@Test
-	void testSearch() throws IOException {
+	void testAccept01() throws IOException {
+
 		LocalFileSearch localFileSearch = new LocalFileSearch();
 		Map<Path,List<Path>> localFiles = localFileSearch.search();
 

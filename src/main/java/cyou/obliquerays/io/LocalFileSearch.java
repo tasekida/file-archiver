@@ -16,15 +16,12 @@
 package cyou.obliquerays.io;
 
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
+import java.util.Map;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import cyou.obliquerays.config.RadioProperties;
 
@@ -43,22 +40,14 @@ public class LocalFileSearch {
 	 * @return ローカルファイル一覧
 	 * @throws IOException ファイル操作エラー
 	 */
-	public List<Path> search() throws IOException {
+	public Map<Path, List<Path>> search() throws IOException {
 
-		List<Path> files = new ArrayList<>(0);
-		try {
-			Files.walkFileTree(Path.of(RadioProperties.getProperties().getBaseDir()), new SimpleFileVisitor<Path>() {
-			    @Override
-			    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-			    	files.add(file);
-			    	return FileVisitResult.CONTINUE;
-				}
-			});
-		} catch (IOException e) {
-			LOGGER.log(Level.SEVERE, "ローカルファイル一覧の取得に失敗", e);
-			throw e;
-		}
 
-		return files;
+		Map<Path, List<Path>> dirFiles =
+				Files.walk(Path.of(RadioProperties.getProperties().getBaseDir()))
+					.filter(p -> !Files.isDirectory(p))
+					.collect(Collectors.groupingBy(Path::getParent));
+
+		return dirFiles;
 	}
 }

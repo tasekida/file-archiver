@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -27,7 +28,6 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-import cyou.obliquerays.cloud.GDriveFileSendClient;
 import cyou.obliquerays.config.RadioProperties;
 import cyou.obliquerays.io.LocalFileSearch;
 import cyou.obliquerays.status.LockFileStatus;
@@ -63,13 +63,17 @@ public class GDriveArchiveProcess {
 
 		try {
 			Pattern mp3FilePatern = Pattern.compile(".+\\.mp3$");
-			LocalFileSearch LocalFileSearch = new LocalFileSearch();
+			LocalFileSearch localFileSearch = new LocalFileSearch();
 			do {
-				List<Path> localFiles = LocalFileSearch.search();
-				localFiles.stream()
-					.map(p -> p.toAbsolutePath().normalize())
-					.filter(p -> mp3FilePatern.matcher(p.toString()).matches())
-					.forEach(new GDriveFileSendClient());
+				Map<Path,List<Path>> localFiles = localFileSearch.search();
+
+				localFiles.entrySet().stream()
+					.peek(e -> LOGGER.log(Level.CONFIG, "dir = " + e.getKey().toString()))
+					.flatMap(e -> e.getValue().stream())
+					.forEach(p -> LOGGER.log(Level.CONFIG, "file = " + p.toString()));
+
+				// TODO logic
+
 				TimeUnit.MINUTES.sleep(5);
 			} while (RadioProperties.getProperties().isProcess());
 		} catch (Exception e) {
