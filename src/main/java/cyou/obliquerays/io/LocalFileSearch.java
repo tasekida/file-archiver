@@ -16,19 +16,23 @@
 package cyou.obliquerays.io;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.function.Supplier;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import cyou.obliquerays.config.RadioProperties;
 
 /**
  * ローカルファイル検索
  */
-public class LocalFileSearch {
+public class LocalFileSearch implements Supplier<Set<Path>> {
     /** ロガー */
     private static final Logger LOGGER = Logger.getLogger(LocalFileSearch.class.getName());
 
@@ -38,16 +42,17 @@ public class LocalFileSearch {
 	/**
 	 * ローカルファイル一覧を取得
 	 * @return ローカルファイル一覧
-	 * @throws IOException ファイル操作エラー
 	 */
-	public Map<Path, List<Path>> search() throws IOException {
-
-
-		Map<Path, List<Path>> dirFiles =
-				Files.walk(Path.of(RadioProperties.getProperties().getBaseDir()))
-					.filter(p -> !Files.isDirectory(p))
-					.collect(Collectors.groupingBy(Path::getParent));
-
-		return dirFiles;
+	@Override
+	public Set<Path> get() {
+		try (Stream<Path> stream = Files.walk(Path.of(RadioProperties.getProperties().getBaseDir()))) {
+			Set<Path> dirFiles =
+					stream.parallel()
+						.collect(Collectors.toCollection(ConcurrentSkipListSet::new));
+			return dirFiles;
+		} catch (IOException e) {
+			LOGGER.log(Level.SEVERE, "Local File search error",e);
+			throw new UncheckedIOException(e);
+		}
 	}
 }

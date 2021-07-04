@@ -22,9 +22,12 @@ import java.util.logging.Logger;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import cyou.obliquerays.cloud.pojo.GDriveFile;
 
 /** GoogleDriveFileUploadTestのUnitTest */
 class GoogleDriveFileUploadTest {
@@ -55,14 +58,15 @@ class GoogleDriveFileUploadTest {
 
 	@Test
 	void testApply() {
-		GoogleJsonWebToken jwt = GoogleJsonWebToken.getInstance();
-		GoogleJWTAccessToken gtoken = GoogleJWTAccessToken.getInstance();
+
+		GoogleOAuth2AccessToken goat = GoogleOAuth2AccessToken.getInstance();
 		GoogleDriveFileUpload gDriveFileUpload = GoogleDriveFileUpload.getInstance();
 
-		String strToken = gtoken.apply(jwt.get());
-		gDriveFileUpload.apply(strToken);
+		GDriveFile gDriveFile = new GDriveFile();
 
-		LOGGER.log(Level.INFO, strToken);
+		boolean retFlg = gDriveFileUpload.test(goat.get(), gDriveFile);
+
+		Assertions.assertTrue(retFlg);
 	}
 
 }

@@ -15,12 +15,12 @@
  */
 package cyou.obliquerays.cloud.pojo;
 
-import java.nio.file.Path;
+import java.util.Arrays;
 
 /**
- * Google Drive上のファイル
+ * Google Drive上のリソース
  */
-public class GDriveFile {
+public class GDriveResource {
 
 	/** Google Drive ファイルID */
 	private String id;
@@ -28,14 +28,11 @@ public class GDriveFile {
 	/** ファイル名 */
 	private String name;
 
-	/** ファイルオブジェクト */
-	private Path path;
-
-	/** 親フォルダ */
-	private GDriveFile parent;
+	/** 親フォルダID */
+	private String[] parents;
 
 	/** コンストラクタ */
-	public GDriveFile() {}
+	public GDriveResource() {}
 
 	/** @return id ファイルID */
 	public String getId() {
@@ -47,14 +44,9 @@ public class GDriveFile {
 		return this.name;
 	}
 
-	/** @return path ファイルオブジェクト */
-	public Path getPath() {
-		return this.path;
-	}
-
-	/** @return parent ファイルオブジェクト */
-	public GDriveFile getParent() {
-		return this.parent;
+	/** @return parents 親フォルダID */
+	public String[] getParents() {
+		return this.parents;
 	}
 
 	/** @param _id ファイルID */
@@ -67,23 +59,17 @@ public class GDriveFile {
 		this.name = _name;
 	}
 
-	/** @param _path ファイルオブジェクト */
-	public void setPath(Path _path) {
-		this.path = _path;
-	}
-
-	/** @param _path ファイルオブジェクト */
-	public void setParent(GDriveFile _parent) {
-		this.parent = _parent;
+	/** @param _parents 親フォルダID */
+	public void setParents(String[] _parents) {
+		this.parents = _parents;
 	}
 
 	@Override
 	public String toString() {
-		return new StringBuilder("GDriveFile [")
-				.append("id=").append(this.id)
-				.append(", name=").append(this.name)
-				.append(", path=").append(this.path)
-				.append(", parent=").append(this.parent)
-				.append("]").toString();
+		return new StringBuilder()
+			.append("id=").append(this.id)
+			.append(", name=").append(this.name)
+			.append(", parents=").append(Arrays.toString(this.parents))
+			.toString();
 	}
 }

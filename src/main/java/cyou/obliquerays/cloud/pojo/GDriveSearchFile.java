@@ -23,10 +23,10 @@ import java.util.List;
  */
 public final class GDriveSearchFile {
 
-	private List<GDriveFile> files = new ArrayList<>(0);
+	private List<GDriveResource> files = new ArrayList<>(0);
 
 	/** @param _files ファイル一覧 */
-	public void setFiles(List<GDriveFile> _files) {
+	public void setFiles(List<GDriveResource> _files) {
 		this.files.clear();
 		if (null != _files && !_files.isEmpty()) {
 			this.files.addAll(_files);
@@ -34,7 +34,7 @@ public final class GDriveSearchFile {
 	}
 
 	/** @return files ファイル一覧 */
-	public List<GDriveFile> getFiles() {
-		return List.copyOf(this.files);
+	public List<GDriveResource> getFiles() {
+		return this.files;
 	}
 }

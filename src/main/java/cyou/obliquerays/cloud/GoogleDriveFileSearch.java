@@ -29,7 +29,7 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import cyou.obliquerays.cloud.pojo.GDriveFile;
+import cyou.obliquerays.cloud.pojo.GDriveResource;
 import cyou.obliquerays.cloud.pojo.GDriveSearchFile;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
@@ -39,7 +39,7 @@ import jakarta.json.bind.JsonbConfig;
  * GoogleAPIのFiles:listを実行<br>
  * https://developers.google.com/drive/api/v3/reference/files/list
  */
-public class GoogleDriveFileSearch implements Function<String, List<GDriveFile>> {
+public class GoogleDriveFileSearch implements Function<String, List<GDriveResource>> {
     /** ロガー */
     private static final Logger LOGGER = Logger.getLogger(GoogleDriveFileSearch.class.getName());
 
@@ -66,13 +66,13 @@ public class GoogleDriveFileSearch implements Function<String, List<GDriveFile>>
 	 * スケルトン
 	 */
 	@Override
-	public List<GDriveFile> apply(String _accessToken) {
+	public List<GDriveResource> apply(String _accessToken) {
 		String accessToken = Objects.requireNonNull(_accessToken);
 
 		try (Jsonb jsonb = JsonbBuilder.create(new JsonbConfig().withFormatting(false))) {
 
 			StringBuilder strUri = new StringBuilder("https://www.googleapis.com/drive/v3/files");
-			strUri.append("?fields=nextPageToken,%20files(id,%20name)");
+			strUri.append("?fields=nextPageToken,files(id,name,parents)");
 
 			HttpRequest request = HttpRequest.newBuilder()
 	                .uri(URI.create(strUri.toString()))

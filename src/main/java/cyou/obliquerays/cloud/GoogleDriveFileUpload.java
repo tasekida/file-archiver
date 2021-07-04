@@ -24,14 +24,16 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 import java.util.Objects;
-import java.util.function.UnaryOperator;
+import java.util.function.BiPredicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import cyou.obliquerays.cloud.pojo.GDriveFile;
 
 /**
  * GoogleAPIのAccessTokenを取得
  */
-public class GoogleDriveFileUpload implements UnaryOperator<String> {
+public class GoogleDriveFileUpload implements BiPredicate<String, GDriveFile> {
     /** ロガー */
     private static final Logger LOGGER = Logger.getLogger(GoogleDriveFileUpload.class.getName());
 
@@ -58,12 +60,14 @@ public class GoogleDriveFileUpload implements UnaryOperator<String> {
 	 * スケルトン
 	 */
 	@Override
-	public String apply(String _accessToken) {
+	public boolean test(String _accessToken, GDriveFile _gDriveFile) {
 		String accessToken = Objects.requireNonNull(_accessToken);
+
+		// TODO
 
 		try {
 			HttpRequest request = HttpRequest.newBuilder()
-	                .uri(URI.create("https://www.googleapis.com/drive/v3/files?fields=nextPageToken,%20files(id,%20name)"))
+	                .uri(URI.create("https://www.googleapis.com/upload/drive/v3/files"))
 	                .timeout(Duration.ofMinutes(30))
 	                .header("Accept-Encoding", "gzip")
 	                .header("Authorization", "Bearer " + accessToken)
@@ -76,7 +80,7 @@ public class GoogleDriveFileUpload implements UnaryOperator<String> {
 	        LOGGER.log(Level.INFO, "google access token responce code = " + response.statusCode());
 	        LOGGER.log(Level.CONFIG, "google access token responce body = " + response.body());
 
-			return response.body();
+			return response.body().isEmpty();
 
 		} catch (Exception e) {
 

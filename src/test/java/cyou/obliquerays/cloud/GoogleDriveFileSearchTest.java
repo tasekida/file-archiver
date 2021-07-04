@@ -70,7 +70,7 @@ import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 
-import cyou.obliquerays.cloud.pojo.GDriveFile;
+import cyou.obliquerays.cloud.pojo.GDriveResource;
 import cyou.obliquerays.config.RadioProperties;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
@@ -235,9 +235,10 @@ class GoogleDriveFileSearchTest {
 
 		String strToken = goat.get();
 
-		List<GDriveFile> files = gDriveFileSearch.apply(strToken);
+		List<GDriveResource> files = gDriveFileSearch.apply(strToken);
 
 		files.forEach(s -> LOGGER.log(Level.INFO, s.toString()));
+
 	}
 
 	/**

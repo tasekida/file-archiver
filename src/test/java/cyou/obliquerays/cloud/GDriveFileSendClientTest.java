@@ -18,8 +18,7 @@ package cyou.obliquerays.cloud;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -67,11 +66,9 @@ class GDriveFileSendClientTest {
 	void testAccept01() throws IOException {
 
 		LocalFileSearch localFileSearch = new LocalFileSearch();
-		Map<Path,List<Path>> localFiles = localFileSearch.search();
+		Set<Path> localFiles = localFileSearch.get();
 
-		localFiles.entrySet().stream()
-			.peek(e -> LOGGER.log(Level.CONFIG, "dir = " + e.getKey().toString()))
-			.flatMap(e -> e.getValue().stream())
-			.forEach(p -> LOGGER.log(Level.CONFIG, "file = " + p.toString()));
+		GDriveFileSendClient client = new GDriveFileSendClient();
+		client.accept(localFiles);
 	}
 }

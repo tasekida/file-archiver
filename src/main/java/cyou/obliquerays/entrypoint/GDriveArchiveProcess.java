@@ -18,8 +18,6 @@ package cyou.obliquerays.entrypoint;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -65,12 +63,7 @@ public class GDriveArchiveProcess {
 			Pattern mp3FilePatern = Pattern.compile(".+\\.mp3$");
 			LocalFileSearch localFileSearch = new LocalFileSearch();
 			do {
-				Map<Path,List<Path>> localFiles = localFileSearch.search();
 
-				localFiles.entrySet().stream()
-					.peek(e -> LOGGER.log(Level.CONFIG, "dir = " + e.getKey().toString()))
-					.flatMap(e -> e.getValue().stream())
-					.forEach(p -> LOGGER.log(Level.CONFIG, "file = " + p.toString()));
 
 				// TODO logic
 
