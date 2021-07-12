@@ -20,15 +20,21 @@ import java.net.http.HttpClient;
 import java.net.http.HttpClient.Redirect;
 import java.net.http.HttpClient.Version;
 import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import cyou.obliquerays.cloud.pojo.GDriveFile;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
+import jakarta.json.bind.JsonbConfig;
 
 /**
  * GoogleAPIのAccessTokenを取得
@@ -64,21 +70,27 @@ public class GoogleDriveFileUpload implements BiPredicate<String, GDriveFile> {
 		String accessToken = Objects.requireNonNull(_accessToken);
 
 		// TODO
+		try (Jsonb jsonb = JsonbBuilder.create(new JsonbConfig().withFormatting(false))) {
+			Path file = _gDriveFile.getPath();
+			String fileName = _gDriveFile.getName();
 
-		try {
+			Map<String, String> bodyParam = Map.of("mimeType", "application/vnd.google-apps.folder", "name", fileName);
+			String bodyJson = jsonb.toJson(bodyParam);
+
 			HttpRequest request = HttpRequest.newBuilder()
-	                .uri(URI.create("https://www.googleapis.com/upload/drive/v3/files"))
+	                .uri(URI.create("https://www.googleapis.com/drive/v3/files?fields=id"))
 	                .timeout(Duration.ofMinutes(30))
-	                .header("Accept-Encoding", "gzip")
 	                .header("Authorization", "Bearer " + accessToken)
-	                .GET()
+	                .header("Accept-Encoding", "gzip")
+	                .header("Content-Type", "application/json; charset=UTF-8")
+	                .POST(BodyPublishers.ofString(bodyJson))
 	                .build();
-	        LOGGER.log(Level.CONFIG, "google access token request body = " + request.toString());
+	        LOGGER.log(Level.CONFIG, "google drive directory create request body = " + request.toString());
 
 	        HttpResponse<String> response = this.client.send(request, BodyHandlers.ofString());
 
-	        LOGGER.log(Level.INFO, "google access token responce code = " + response.statusCode());
-	        LOGGER.log(Level.CONFIG, "google access token responce body = " + response.body());
+	        LOGGER.log(Level.INFO, "google drive directory create responce code = " + response.statusCode());
+	        LOGGER.log(Level.CONFIG, "google drive directory create responce body = " + response.body());
 
 			return response.body().isEmpty();
 

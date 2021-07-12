@@ -36,7 +36,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -181,7 +180,7 @@ class GoogleDriveFileSearchTest {
 	    JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 	    String TOKENS_DIRECTORY_PATH = "tokens";
 
-	    List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE);
+	    List<String> SCOPES = List.of(DriveScopes.DRIVE_APPDATA, DriveScopes.DRIVE_FILE, DriveScopes.DRIVE_METADATA, DriveScopes.DRIVE);
 	    String CREDENTIALS_FILE_PATH = "/credentials.json";
 
         NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
