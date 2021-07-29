@@ -38,6 +38,7 @@ import jakarta.json.bind.JsonbConfig;
 /**
  * GoogleAPIのAccessTokenを取得
  */
+@Deprecated
 public class GoogleJWTAccessToken implements UnaryOperator<String> {
     /** ロガー */
     private static final Logger LOGGER = Logger.getLogger(GoogleJWTAccessToken.class.getName());

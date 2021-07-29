@@ -48,6 +48,7 @@ import jakarta.json.bind.JsonbConfig;
 /**
  * GoogleAPIのJsonWebTokenを取得
  */
+@Deprecated
 public class GoogleJsonWebToken implements Supplier<String> {
     /** ロガー */
     private static final Logger LOGGER = Logger.getLogger(GoogleJsonWebToken.class.getName());
