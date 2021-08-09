@@ -237,7 +237,6 @@ class GoogleDriveFileSearchTest {
 		List<GDriveResource> files = gDriveFileSearch.apply(strToken);
 
 		files.forEach(s -> LOGGER.log(Level.INFO, s.toString()));
-
 	}
 
 	/**

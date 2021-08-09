@@ -1,5 +1,5 @@
 /**
- *  Copyright 2021 takahiro
+ *  Copyright (C) 2021 tasekida
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -50,7 +50,9 @@ public class MultipartBodyPublisher implements BodyPublisher {
 
 	private static final byte[] JSON_METADATA_SUFFIX = "\"}\r\n".getBytes(StandardCharsets.UTF_8);
 
-	private final BodyPublisher delegate;
+	private static final long MAX_FILESIZE = 1073741824L;
+
+	private final BodyPublisher orig;
 
 	/**
 	 * コンストラクタ
@@ -59,6 +61,12 @@ public class MultipartBodyPublisher implements BodyPublisher {
 	public MultipartBodyPublisher(String _fileName, Path _filePath) throws Exception {
 		String fileName = Objects.requireNonNull(_fileName, "fileName must not be null");
 		Path filePath = Objects.requireNonNull(_filePath, "filePath must not be null");
+
+		long fileSize = Files.size(filePath);
+		if (fileSize > MAX_FILESIZE) {
+			String msg = new StringBuilder("[").append(filePath.toString()).append("] is too large. [").append((double)fileSize/MAX_FILESIZE).append("GB]").toString();
+			throw new IllegalArgumentException(msg);
+		}
 
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		outputStream.writeBytes(NEW_PART);
@@ -73,19 +81,19 @@ public class MultipartBodyPublisher implements BodyPublisher {
 		outputStream.writeBytes(Files.readAllBytes(filePath));
 		outputStream.writeBytes(NEW_LINE);
 		outputStream.writeBytes(END_PART);
-		this.delegate = BodyPublishers.ofByteArray(outputStream.toByteArray());
+		this.orig = BodyPublishers.ofByteArray(outputStream.toByteArray());
 	}
 
 	@Override
 	public void subscribe(Subscriber<? super ByteBuffer> _subscriber) {
 		LOGGER.log(Level.CONFIG, "begin");
-		this.delegate.subscribe(_subscriber);
+		this.orig.subscribe(_subscriber);
 		LOGGER.log(Level.CONFIG, "finish");
 	}
 
 	@Override
 	public long contentLength() {
-		long contentLength = this.delegate.contentLength();
+		long contentLength = this.orig.contentLength();
 		LOGGER.log(Level.CONFIG, "contentLength = ".concat(String.valueOf(contentLength)));
 		return contentLength;
 	}

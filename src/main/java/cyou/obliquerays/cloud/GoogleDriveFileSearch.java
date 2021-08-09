@@ -15,13 +15,11 @@
  */
 package cyou.obliquerays.cloud;
 
-import java.net.URI;
+import java.io.IOException;
 import java.net.http.HttpClient;
 import java.net.http.HttpClient.Redirect;
 import java.net.http.HttpClient.Version;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
@@ -29,11 +27,9 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import cyou.obliquerays.cloud.http.GoogleDriveFileSearchBodyHandler;
+import cyou.obliquerays.cloud.http.GoogleDriveFileSearchRequest;
 import cyou.obliquerays.cloud.pojo.GDriveResource;
-import cyou.obliquerays.cloud.pojo.GDriveSearchFile;
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
-import jakarta.json.bind.JsonbConfig;
 
 /**
  * GoogleAPIのFiles:listを実行<br>
@@ -68,34 +64,14 @@ public class GoogleDriveFileSearch implements Function<String, List<GDriveResour
 	@Override
 	public List<GDriveResource> apply(String _accessToken) {
 		String accessToken = Objects.requireNonNull(_accessToken);
-
-		try (Jsonb jsonb = JsonbBuilder.create(new JsonbConfig().withFormatting(false))) {
-
-			StringBuilder strUri = new StringBuilder("https://www.googleapis.com/drive/v3/files");
-			strUri.append("?fields=nextPageToken,files(id,name,parents)");
-
-			HttpRequest request = HttpRequest.newBuilder()
-	                .uri(URI.create(strUri.toString()))
-	                .timeout(Duration.ofMinutes(30))
-	                .header("Authorization", "Bearer " + accessToken)
-	                .GET()
-	                .build();
-	        LOGGER.log(Level.CONFIG, "google access token request body = " + request.toString());
-
-	        HttpResponse<String> response = this.client.send(request, BodyHandlers.ofString());
-
+		try {
+			HttpResponse<List<GDriveResource>> response = this.client.send(
+					new GoogleDriveFileSearchRequest(accessToken), new GoogleDriveFileSearchBodyHandler());
 	        LOGGER.log(Level.INFO, "google access token responce code = " + response.statusCode());
 	        LOGGER.log(Level.CONFIG, "google access token responce body = " + response.body());
-
-	        String strResponseBody = response.body();
-	        GDriveSearchFile gDriveSearchFile = jsonb.fromJson(strResponseBody, GDriveSearchFile.class);
-
-			return gDriveSearchFile.getFiles();
-
-		} catch (Exception e) {
-
+	        return response.body();
+		} catch (IOException | InterruptedException e) {
 			throw new IllegalStateException(e);
-
 		}
 	}
 

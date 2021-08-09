@@ -15,7 +15,20 @@
  */
 package cyou.obliquerays.cloud;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.net.http.HttpClient;
+import java.net.http.HttpClient.Redirect;
+import java.net.http.HttpClient.Version;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -25,6 +38,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import com.google.api.client.auth.oauth2.StoredCredential;
+
+import cyou.obliquerays.cloud.http.GoogleOAuth2AccessTokenBodyHandler;
+import cyou.obliquerays.cloud.http.GoogleOAuth2AccessTokenRequest;
+import cyou.obliquerays.config.RadioProperties;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
+import jakarta.json.bind.JsonbConfig;
 
 /** GoogleOAuth2AccessTokenのUnitTest */
 class GoogleOAuth2AccessTokenTest {
@@ -65,4 +87,67 @@ class GoogleOAuth2AccessTokenTest {
 		LOGGER.log(Level.INFO, strToken);
 	}
 
+	/**
+	 * {@link cyou.obliquerays.cloud.GoogleOAuth2AccessToken#apply(java.lang.String)} のためのテスト・メソッド。
+	 */
+	@Test
+	void testExample() {
+		StoredCredential storedObj = null;
+		try (InputStream inStore = ClassLoader.getSystemResourceAsStream(RadioProperties.getProperties().getProperty("google.credentials.stored"));
+				ObjectInputStream objectInStore = new ObjectInputStream(new ByteArrayInputStream(inStore.readAllBytes()))) {
+
+			@SuppressWarnings("unchecked")
+			Map<String, byte[]> stored = (Map<String, byte[]>) objectInStore.readObject();
+			storedObj = (StoredCredential) new ObjectInputStream(new ByteArrayInputStream(stored.get("user"))).readObject();
+		} catch (Exception e) {
+
+			throw new IllegalStateException(e);
+		} finally {
+
+			LOGGER.log(Level.CONFIG, storedObj.toString());
+			Objects.requireNonNull(storedObj);
+		}
+
+		String accessToken = null;
+		try (InputStream inJson = ClassLoader.getSystemResourceAsStream(RadioProperties.getProperties().getProperty("google.credentials.json"));
+				Jsonb jsonb = JsonbBuilder.create(new JsonbConfig().withFormatting(false))) {
+
+			LocalDateTime expiration =
+					LocalDateTime.ofInstant(Instant.ofEpochMilli(storedObj.getExpirationTimeMilliseconds()), ZoneId.systemDefault());
+
+			if (expiration.isBefore(LocalDateTime.now())) {
+				@SuppressWarnings("unchecked")
+				Map<String, Object> credentials = jsonb.fromJson(inJson, Map.class);
+				@SuppressWarnings("unchecked")
+				Map<String, Object> installed = (Map<String, Object>) credentials.get("installed");
+
+				HttpRequest refreshRequest = new GoogleOAuth2AccessTokenRequest(storedObj.getRefreshToken(), installed.get("client_id").toString(), installed.get("client_secret").toString());
+
+				HttpClient client = HttpClient.newBuilder()
+		                .version(Version.HTTP_2)
+		                .followRedirects(Redirect.NORMAL)
+		                .connectTimeout(Duration.ofSeconds(30))
+		                .proxy(HttpClient.Builder.NO_PROXY)
+		                .build();
+
+				HttpResponse<Map<String, String>> refreshResponse = client.send(refreshRequest, new GoogleOAuth2AccessTokenBodyHandler());
+
+				accessToken = refreshResponse.body().get("access_token");
+
+			} else {
+
+				accessToken = storedObj.getAccessToken();
+
+			}
+		} catch (Exception e) {
+
+			throw new IllegalStateException(e);
+		} finally {
+
+			LOGGER.log(Level.CONFIG, accessToken);
+			Objects.requireNonNull(accessToken);
+		}
+
+		LOGGER.log(Level.INFO, accessToken);
+	}
 }

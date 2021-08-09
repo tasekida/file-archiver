@@ -18,14 +18,10 @@ package cyou.obliquerays.cloud;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpClient.Redirect;
 import java.net.http.HttpClient.Version;
-import java.net.http.HttpRequest;
-import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -35,10 +31,11 @@ import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.GZIPInputStream;
 
 import com.google.api.client.auth.oauth2.StoredCredential;
 
+import cyou.obliquerays.cloud.http.GoogleOAuth2AccessTokenBodyHandler;
+import cyou.obliquerays.cloud.http.GoogleOAuth2AccessTokenRequest;
 import cyou.obliquerays.config.RadioProperties;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
@@ -105,25 +102,12 @@ public class GoogleOAuth2AccessToken implements Supplier<String> {
 				@SuppressWarnings("unchecked")
 				Map<String, Object> installed = (Map<String, Object>) credentials.get("installed");
 
-				StringBuilder strPostParam =
-						new StringBuilder("grant_type=refresh_token")
-						.append("&refresh_token=").append(storedObj.getRefreshToken())
-						.append("&client_id=").append(installed.get("client_id").toString())
-						.append("&client_secret=").append(installed.get("client_secret").toString());
+				HttpResponse<Map<String, String>> refreshResponse = this.client.send(
+						new GoogleOAuth2AccessTokenRequest(storedObj.getRefreshToken(), installed.get("client_id").toString(), installed.get("client_secret").toString())
+						, new GoogleOAuth2AccessTokenBodyHandler());
+				Map<String, String> refreshToken = refreshResponse.body();
 
-				HttpRequest refreshRequest = HttpRequest.newBuilder()
-		                .uri(URI.create("https://oauth2.googleapis.com/token"))
-		                .timeout(Duration.ofMinutes(30))
-		                .header("Accept-Encoding", "gzip")
-		                .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-		                .POST(BodyPublishers.ofString(strPostParam.toString()))
-		                .build();
-
-				HttpResponse<InputStream> refreshResponse = this.client.send(refreshRequest, BodyHandlers.ofInputStream());
-				@SuppressWarnings("unchecked")
-				Map<String, Object> refreshToken = jsonb.fromJson(new GZIPInputStream(refreshResponse.body()), Map.class);
-
-				accessToken = refreshToken.get("access_token").toString();
+				accessToken = refreshToken.get("access_token");
 
 			} else {
 

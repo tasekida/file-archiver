@@ -40,6 +40,7 @@ import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.FileContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -49,6 +50,7 @@ import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 
 import cyou.obliquerays.cloud.pojo.GDriveFile;
+import cyou.obliquerays.config.RadioProperties;
 
 /** GoogleDriveFileUploadTestのUnitTest */
 class GoogleDriveFileUploadTest {
@@ -78,16 +80,18 @@ class GoogleDriveFileUploadTest {
 	void tearDown() throws Exception {}
 
 	@Test
-	void testApply() {
+	void testApply001() {
 
 		GoogleOAuth2AccessToken goat = GoogleOAuth2AccessToken.getInstance();
 		GoogleDriveFileUpload gDriveFileUpload = GoogleDriveFileUpload.getInstance();
 
 		String strToken = goat.get();
 
+		Path basePath = Path.of(RadioProperties.getProperties().getBaseDir(), "english0-20210529.mp3");
+
 		GDriveFile gDriveFile = new GDriveFile();
-		gDriveFile.setPath(Path.of("testtest"));
-		gDriveFile.setName("testtest");
+		gDriveFile.setPath(basePath);
+		gDriveFile.setName(basePath.getFileName().toString());
 
 		boolean retFlg = gDriveFileUpload.test(strToken, gDriveFile);
 
@@ -126,12 +130,12 @@ class GoogleDriveFileUploadTest {
                 .build();
 
 		File fileMetadata = new File();
-		fileMetadata.setName("Invoices");
-		fileMetadata.setMimeType("application/vnd.google-apps.folder");
-
-		File file = driveService.files().create(fileMetadata)
+		fileMetadata.setName("english0-20210529.mp3");
+		java.io.File filePath = new java.io.File(RadioProperties.getProperties().getBaseDir(), "english0-20210529.mp3");
+		FileContent mediaContent = new FileContent("audio/mpeg", filePath);
+		File file = driveService.files().create(fileMetadata, mediaContent)
 		    .setFields("id")
 		    .execute();
-		System.out.println("Folder ID: " + file.getId());
+		System.out.println("File ID: " + file.getId());
 	}
 }
