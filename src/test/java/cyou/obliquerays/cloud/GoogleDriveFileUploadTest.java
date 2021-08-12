@@ -88,6 +88,7 @@ class GoogleDriveFileUploadTest {
 		String strToken = goat.get();
 
 		Path basePath = Path.of(RadioProperties.getProperties().getBaseDir(), "english0-20210529.mp3");
+//		Path basePath = Path.of(RadioProperties.getProperties().getBaseDir(), "20210526");
 
 		GDriveFile gDriveFile = new GDriveFile();
 		gDriveFile.setPath(basePath);

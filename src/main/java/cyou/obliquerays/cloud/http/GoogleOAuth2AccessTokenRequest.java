@@ -83,11 +83,18 @@ public class GoogleOAuth2AccessTokenRequest extends HttpRequest {
 		return this.orig.headers();
 	}
 
-	public class GoogleOAuth2AccessTokenBodyPublisher implements BodyPublisher {
+	@Override
+	public String toString() {
+		return new StringBuilder("GoogleOAuth2AccessTokenRequest [")
+				.append("orig=").append(this.orig)
+				.append("]").toString();
+	}
+
+	private class GoogleOAuth2AccessTokenBodyPublisher implements BodyPublisher {
 
 		private final BodyPublisher orig;
 
-		public GoogleOAuth2AccessTokenBodyPublisher(String _refreshToken, String _clientId, String _clientSecret) {
+		private GoogleOAuth2AccessTokenBodyPublisher(String _refreshToken, String _clientId, String _clientSecret) {
 			String strBody = new StringBuilder("grant_type=refresh_token")
 					.append("&refresh_token=").append(_refreshToken)
 					.append("&client_id=").append(_clientId)
@@ -110,5 +117,11 @@ public class GoogleOAuth2AccessTokenRequest extends HttpRequest {
 			return contentLength;
 		}
 
+		@Override
+		public String toString() {
+			return new StringBuilder("GoogleOAuth2AccessTokenBodyPublisher [")
+					.append("orig=").append(this.orig)
+					.append("]").toString();
+		}
 	}
 }

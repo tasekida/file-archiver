@@ -84,4 +84,11 @@ public class GoogleDriveFileSearchRequest extends HttpRequest {
 	public HttpHeaders headers() {
 		return this.orig.headers();
 	}
+
+	@Override
+	public String toString() {
+		return new StringBuilder("GoogleDriveFileSearchRequest [")
+				.append("orig=").append(this.orig)
+				.append("]").toString();
+	}
 }

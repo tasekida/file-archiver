@@ -17,13 +17,13 @@ package cyou.obliquerays.cloud.http;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.http.HttpResponse.BodyHandler;
 import java.net.http.HttpResponse.BodySubscriber;
 import java.net.http.HttpResponse.BodySubscribers;
 import java.net.http.HttpResponse.ResponseInfo;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletionStage;
@@ -32,45 +32,42 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
-import jakarta.json.bind.JsonbConfig;
-
 /**
  *
  */
-public class GoogleOAuth2AccessTokenBodyHandler implements BodyHandler<Map<String, String>> {
+public class GoogleDriveFileUploadBodyHandler implements BodyHandler<String> {
     /** ロガー */
-    private static final Logger LOGGER = Logger.getLogger(GoogleOAuth2AccessTokenBodyHandler.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GoogleDriveFileUploadBodyHandler.class.getName());
+
+	/** コンストラクタ */
+	public GoogleDriveFileUploadBodyHandler() {}
+
+	@Override
+	public BodySubscriber<String> apply(ResponseInfo _responseInfo) {
+		// debug log
+		_responseInfo.headers().map().entrySet().stream()
+				.map(Map.Entry::toString)
+				.forEach(s -> LOGGER.log(Level.CONFIG, s));
+		return new GoogleDriveFileSearchBodySubscriber();
+	}
 
 	/**
 	 *
 	 */
-	public GoogleOAuth2AccessTokenBodyHandler() {}
+	private class GoogleDriveFileSearchBodySubscriber implements BodySubscriber<String> {
 
-	@Override
-	public BodySubscriber<Map<String, String>> apply(ResponseInfo _responseInfo) {
-		// debug
-		_responseInfo.headers().map().entrySet().stream()
-				.map(Map.Entry::toString)
-				.forEach(s -> LOGGER.log(Level.CONFIG, s));
+		/** 実装 */
+		private final BodySubscriber<String> orig;
 
-		return new GoogleOAuth2AccessTokenBodySubscriber();
-	}
-
-	private class GoogleOAuth2AccessTokenBodySubscriber implements BodySubscriber<Map<String, String>> {
-
-		private final BodySubscriber<Map<String, String>> orig;
-
-		private GoogleOAuth2AccessTokenBodySubscriber() {
+		/**
+		 * コンストラクタ
+		 */
+		private GoogleDriveFileSearchBodySubscriber() {
 			this.orig = BodySubscribers.mapping(
 					BodySubscribers.ofByteArray()
 					, bytes -> {
-						try (Jsonb jsonb = JsonbBuilder.create(new JsonbConfig().withFormatting(false));
-								InputStream is = new GZIPInputStream(new ByteArrayInputStream(bytes))) {
-							@SuppressWarnings("unchecked")
-							Map<String, String> refreshToken = jsonb.fromJson(is, Map.class);
-							return refreshToken;
+						try (GZIPInputStream is = new GZIPInputStream(new ByteArrayInputStream(bytes))) {
+							return new String(is.readAllBytes(), StandardCharsets.UTF_8);
 						} catch (IOException e) {
 							LOGGER.log(Level.SEVERE, "レスポンス情報の取得に失敗", e);
 							throw new UncheckedIOException(e);
@@ -78,7 +75,7 @@ public class GoogleOAuth2AccessTokenBodyHandler implements BodyHandler<Map<Strin
 							LOGGER.log(Level.SEVERE, "レスポンス情報の取得に失敗", e);
 							throw new IllegalStateException(e);
 						}
-					});
+					});;
 		}
 
 		@Override
@@ -106,13 +103,13 @@ public class GoogleOAuth2AccessTokenBodyHandler implements BodyHandler<Map<Strin
 		}
 
 		@Override
-		public CompletionStage<Map<String, String>> getBody() {
+		public CompletionStage<String> getBody() {
 			return this.orig.getBody();
 		}
 
 		@Override
 		public String toString() {
-			return new StringBuilder("GoogleOAuth2AccessTokenBodySubscriber [")
+			return new StringBuilder("GoogleDriveFileSearchBodySubscriber [")
 					.append("orig=").append(this.orig)
 					.append("]").toString();
 		}

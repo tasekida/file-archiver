@@ -55,11 +55,10 @@ public class GoogleDriveFileSearchBodyHandler implements BodyHandler<List<GDrive
 		return new GoogleDriveFileSearchBodySubscriber();
 	}
 
-
 	/**
 	 *
 	 */
-	public class GoogleDriveFileSearchBodySubscriber implements BodySubscriber<List<GDriveResource>> {
+	private class GoogleDriveFileSearchBodySubscriber implements BodySubscriber<List<GDriveResource>> {
 
 		/** 実装 */
 		private final BodySubscriber<List<GDriveResource>> orig;
@@ -67,7 +66,7 @@ public class GoogleDriveFileSearchBodyHandler implements BodyHandler<List<GDrive
 		/**
 		 * コンストラクタ
 		 */
-		public GoogleDriveFileSearchBodySubscriber() {
+		private GoogleDriveFileSearchBodySubscriber() {
 			this.orig = BodySubscribers.mapping(
 					BodySubscribers.ofString(StandardCharsets.UTF_8)
 					, str -> {
@@ -111,6 +110,13 @@ public class GoogleDriveFileSearchBodyHandler implements BodyHandler<List<GDrive
 		@Override
 		public CompletionStage<List<GDriveResource>> getBody() {
 			return this.orig.getBody();
+		}
+
+		@Override
+		public String toString() {
+			return new StringBuilder("GoogleDriveFileSearchBodySubscriber [")
+					.append("orig=").append(this.orig)
+					.append("]").toString();
 		}
 	}
 }
